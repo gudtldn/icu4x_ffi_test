@@ -3,6 +3,39 @@ project(icu4x_ffi_test LANGUAGES CXX)
 
 
 # =====================================================================
+# FetchContent 설정 (의존성 자동 다운로드)
+# =====================================================================
+include(FetchContent)
+
+# Corrosion (Rust 빌드 연동 모듈) 가져오기
+FetchContent_Declare(
+        Corrosion
+        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+        GIT_TAG        v0.6.1
+        GIT_SHALLOW    TRUE
+)
+
+# ICU4X 소스코드 가져오기
+FetchContent_Declare(
+        icu4x_src
+        GIT_REPOSITORY https://github.com/unicode-org/icu4x.git
+        GIT_TAG        icu@2.1.0
+        GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(Corrosion icu4x_src)
+
+
+# =====================================================================
+# ICU4X Crate(Cargo.toml)를 CMake 타겟으로 가져오기
+# Usage: https://corrosion-rs.github.io/corrosion/usage.html
+# =====================================================================
+corrosion_import_crate(
+        MANIFEST_PATH "${icu4x_src_SOURCE_DIR}/ffi/capi/Cargo.toml"
+)
+
+
+# =====================================================================
 # 컴파일 타겟 세팅
 # =====================================================================
 add_executable(icu4x_ffi_test main.cpp)
@@ -15,6 +48,16 @@ target_compile_features(icu4x_ffi_test PRIVATE
 set_target_properties(icu4x_ffi_test PROPERTIES
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
+)
+
+# 빌드된 Rust 라이브러리(icu_capi)를 C++ 실행 파일에 링킹
+target_link_libraries(icu4x_ffi_test PRIVATE
+        icu_capi
+)
+
+# C++ 바인딩 헤더 경로 지정
+target_include_directories(icu4x_ffi_test PRIVATE
+        "${icu4x_src_SOURCE_DIR}/ffi/capi/bindings/cpp"
 )
 
 # 컴파일러별 옵션 설정
