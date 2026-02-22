@@ -32,6 +32,7 @@ FetchContent_MakeAvailable(Corrosion icu4x_src)
 # =====================================================================
 corrosion_import_crate(
         MANIFEST_PATH "${icu4x_src_SOURCE_DIR}/ffi/capi/Cargo.toml"
+        OVERRIDE_CRATE_TYPE icu_capi=staticlib
 )
 
 
